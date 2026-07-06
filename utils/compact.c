@@ -5,11 +5,7 @@
 #include <limits.h>
 #include <float.h>
 #include <string.h>
-
-typedef struct {
-    int* result;
-    int n;
-} res;
+#include "compact.h"
 
 res compress(int num, int target_num, int n_chunks)
 {
@@ -115,7 +111,8 @@ res compressf(float num, float target_num, int n_chunks)
 
 
 
-int decompress(res compressed, int offset, int base) {
+int decompress(res compressed, int offset, int base)
+{
     int u = offset;
     int l = 0;
     float chunk_size;
