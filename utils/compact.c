@@ -7,14 +7,12 @@
 #include <string.h>
 #include "compact.h"
 
-res compress(int num, int target_num, int n_chunks)
+res encode(int num, int target_num, int n_chunks)
 {
     int* result = malloc(sizeof(int));
     if (num <= INT_MAX){
         float u, l;
         int n_red;
-        int current = num/2;
-        float chunk_size;
         
         n_red = 0;
         u = (float)num;
@@ -34,8 +32,6 @@ res compress(int num, int target_num, int n_chunks)
             result[n_red] = k;
             n_red++;
 
-            current = (float)(ul + il)/2;
-
             if (ul == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
                 result[n_red] = -1;
@@ -43,10 +39,6 @@ res compress(int num, int target_num, int n_chunks)
             } else if (il == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
                 result[n_red] = -2;
-                break;
-            } else if (current == target_num){
-                result = realloc(result, (n_red+1)*sizeof(int));
-                result[n_red] = -3;
                 break;
             }
         }
@@ -57,14 +49,12 @@ res compress(int num, int target_num, int n_chunks)
     
 }
 
-res compressf(float num, float target_num, int n_chunks)
+res encodef(float num, float target_num, int n_chunks)
 {
     int* result = malloc(sizeof(int));
     if (num <= FLT_MAX){
         float u, l;
         int n_red;
-        float current = num/2;
-        float chunk_size;
         
         n_red = 0;
         u = (float)num;
@@ -86,8 +76,6 @@ res compressf(float num, float target_num, int n_chunks)
             result[n_red] = k;
             n_red++;
 
-            current = (float)(ul + il)/2;
-
             if (ul == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
                 result[n_red] = -1;
@@ -95,10 +83,6 @@ res compressf(float num, float target_num, int n_chunks)
             } else if (il == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
                 result[n_red] = -2;
-                break;
-            } else if (current == target_num){
-                result = realloc(result, (n_red+1)*sizeof(int));
-                result[n_red] = -3;
                 break;
             }
         }
@@ -111,7 +95,7 @@ res compressf(float num, float target_num, int n_chunks)
 
 
 
-int decompress(res compressed, int offset, int base)
+int decode(res compressed, int offset, int base)
 {
     int u = offset;
     int l = 0;
@@ -148,7 +132,7 @@ int decompress(res compressed, int offset, int base)
     }
 }
 
-float decompressf(res compressed, float offset,  int base){
+float decodef(res compressed, float offset,  int base){
     float u = offset;
     float l = 0.0;
     float chunk_size;
@@ -177,62 +161,5 @@ float decompressf(res compressed, float offset,  int base){
             return current;
         default: // Por segurança (nunca deve acontecer)
             return -1;
-    }
-}
-
-int main(int argc, char** argv)
-{
-    int num;
-    int offset;
-    int base;
-
-    float numf;
-    float offsetf;
-    
-    int f = 0;
-
-    for (int i = 0; i < argc-1; i++){
-        if (strcmp(argv[i], "--f") == 0){
-            f = 1;
-        } else if(strcmp(argv[i], "--num") == 0){
-            if (f){
-                numf = atof(argv[i+1]);
-                continue;
-            } num = atoi(argv[i+1]);
-        } else if (strcmp(argv[i], "--base") == 0){
-            base = atoi(argv[i+1]);
-        } else if (strcmp(argv[i], "--offset") == 0){
-            if (f){
-                offsetf = (float)atof(argv[i+1]);
-                continue;
-            } offset = atoi(argv[i+1]);
-        }
-    }
-    if(!f){
-        res r = compress(offset, num, base);
-        for (int j = 0; j < r.n; j++){
-            printf("%d ", r.result[j]);
-        }
-
-        int decompressed = decompress(r, offset, base);
-        if (decompressed == num){
-            printf("Success!!\n");
-        } else{
-            printf("Failure.\n");
-            printf("%d %d\n", decompressed, num);
-        }
-    } else {
-        res r = compressf(offsetf, numf, base);
-        for (int j = 0; j < r.n; j++){
-            printf("%d ", r.result[j]);
-        }
-
-        float decompressed = decompressf(r, offsetf, base);
-        if (decompressed == numf){
-            printf("Success!!\n");
-        } else{
-            printf("Failure.\n");
-            printf("%f %f\n", decompressed, numf);
-        }
     }
 }
