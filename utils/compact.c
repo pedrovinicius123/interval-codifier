@@ -34,11 +34,11 @@ res encode(int num, int target_num, int n_chunks)
 
             if (ul == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
-                result[n_red] = -1;
+                result[n_red] = 1;
                 break;
             } else if (il == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
-                result[n_red] = -2;
+                result[n_red] = 0;
                 break;
             }
         }
@@ -78,11 +78,11 @@ res encodef(float num, float target_num, int n_chunks)
 
             if (ul == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
-                result[n_red] = -1;
+                result[n_red] = 1;
                 break;
             } else if (il == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
-                result[n_red] = -2;
+                result[n_red] = 0;
                 break;
             }
         }
@@ -118,15 +118,12 @@ int decode(res compressed, int offset, int base)
     int last = compressed.result[compressed.n - 1];
     int in = l;
     int un = u;
-    int current = (in + un) / 2;
     
     switch(last) {
-        case -1: // Estava no limite superior
+        case 1: // Estava no limite superior
             return un;
-        case -2: // Estava no limite inferior
+        case 0: // Estava no limite inferior
             return in;
-        case -3: // Estava no meio
-            return current;
         default: // Por segurança (nunca deve acontecer)
             return -1;
     }
@@ -150,15 +147,12 @@ float decodef(res compressed, float offset,  int base){
     int last = compressed.result[compressed.n - 1];
     float in = l;
     float un = u;
-    float current = (in + un) / 2;
     
     switch(last) {
-        case -1: // Estava no limite superior
+        case 1: // Estava no limite superior
             return un;
-        case -2: // Estava no limite inferior
+        case 0: // Estava no limite inferior
             return in;
-        case -3: // Estava no meio
-            return current;
         default: // Por segurança (nunca deve acontecer)
             return -1;
     }
