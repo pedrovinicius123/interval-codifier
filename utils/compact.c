@@ -11,12 +11,13 @@ res encode(int num, int target_num, int n_chunks)
 {
     int* result = malloc(sizeof(int));
     if (num <= INT_MAX){
-        float u, l;
+        float u, l, current;
         int n_red;
         
         n_red = 0;
         u = (float)num;
         l = 0.0;
+        current = u/2;
 
         while (1)
         {   
@@ -28,7 +29,9 @@ res encode(int num, int target_num, int n_chunks)
             u = (float)ul;
             l = (float)il;
 
-            result = realloc(result, (n_red+1)*sizeof(int));
+            current = (u+l)/2;
+            int* temp = realloc(result, (n_red+1)*sizeof(int));
+            result = temp;
             result[n_red] = k;
             n_red++;
 
@@ -39,6 +42,10 @@ res encode(int num, int target_num, int n_chunks)
             } else if (il == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
                 result[n_red] = 0;
+                break;
+            } else if ((int)floor(current) == target_num){
+                result = realloc(result, (n_red+1)*sizeof(int));
+                result[n_red] = -1;
                 break;
             }
         }
@@ -53,12 +60,14 @@ res encodef(float num, float target_num, int n_chunks)
 {
     int* result = malloc(sizeof(int));
     if (num <= FLT_MAX){
-        float u, l;
+        float u, l, current;
         int n_red;
         
         n_red = 0;
         u = (float)num;
         l = 0.0;
+        current = u/2;
+
 
         while (1)
         {   
@@ -71,7 +80,7 @@ res encodef(float num, float target_num, int n_chunks)
             l = il;
 
             //printf("%f %f %f\n", u, l, current);
-
+            current = (u+l)/2;
             result = realloc(result, (n_red+1)*sizeof(int));
             result[n_red] = k;
             n_red++;
@@ -83,6 +92,10 @@ res encodef(float num, float target_num, int n_chunks)
             } else if (il == target_num){
                 result = realloc(result, (n_red+1)*sizeof(int));
                 result[n_red] = 0;
+                break;
+            } else if (current == target_num){
+                result = realloc(result, (n_red+1)*sizeof(int));
+                result[n_red] = -1;
                 break;
             }
         }
@@ -118,14 +131,15 @@ int decode(res compressed, int offset, int base)
     int last = compressed.result[compressed.n - 1];
     int in = l;
     int un = u;
+    int current = (int)floor((in+un)/2);
     
     switch(last) {
         case 1: // Estava no limite superior
             return un;
         case 0: // Estava no limite inferior
             return in;
-        default: // Por segurança (nunca deve acontecer)
-            return -1;
+        case -1: // No meio
+            return current;
     }
 }
 
@@ -147,13 +161,14 @@ float decodef(res compressed, float offset,  int base){
     int last = compressed.result[compressed.n - 1];
     float in = l;
     float un = u;
+    float current = (in+un)/2;
     
     switch(last) {
         case 1: // Estava no limite superior
             return un;
         case 0: // Estava no limite inferior
             return in;
-        default: // Por segurança (nunca deve acontecer)
-            return -1;
+        case -1: // Por segurança (nunca deve acontecer)
+            return current;
     }
 }
